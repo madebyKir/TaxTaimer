@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>История</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <h1>История</h1>
+
+  <div class="button-row">
+    <button class="reset" onclick="location.href='index.html'"><i class="fa-solid fa-arrow-left"></i> Назад</button>
+  </div>
+
+  <div id="history"></div>
+
+  <button class="settings" onclick="location.href='settings.html'">
+    <i class="fa-solid fa-gear"></i>
+  </button>
+
+  <script>
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("history") || "[]");
+      const container = document.getElementById("history");
+      container.innerHTML = "";
+
+      history.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <b>Дата:</b> ${entry.date}<br>
+          <b>Время:</b> ${entry.time}<br>
+          <b>Ставка:</b> ${entry.rate} ${entry.currency}<br>
+          <b>Заработано:</b> ${entry.earned}<br>
+          <label>Комментарий:</label>
+          <textarea onchange="saveComment(${index}, this.value)">${entry.comment || ""}</textarea>
+          <div class="button-row">
+            <button class="reset" onclick="deleteEntry(${index})"><i class="fa-solid fa-trash"></i> Удалить</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteEntry(index) {
+      const history = JSON.parse(localStorage.getItem("history") || "[]");
+      history.splice(index, 1);
+      localStorage.setItem("history", JSON.stringify(history));
+      loadHistory();
+    }
+
+    function saveComment(index, text) {
+      const history = JSON.parse(localStorage.getItem("history") || "[]");
+      history[index].comment = text;
+      localStorage.setItem("history", JSON.stringify(history));
+    }
+
+    window.onload = function () {
+      loadHistory();
+      const settings = JSON.parse(localStorage.getItem("settings") || "{}");
+      if (settings.darkTheme) document.body.classList.add("dark");
+    };
+  </script>
+</body>
+</html>

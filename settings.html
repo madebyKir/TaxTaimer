@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Настройки</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <h1>Настройки</h1>
+
+  <label>Валюта по умолчанию:</label>
+  <select id="currency">
+    <option value="₽">₽</option>
+    <option value="$">$</option>
+    <option value="€">€</option>
+    <option value="¥">¥</option>
+  </select>
+
+  <label>
+    <input type="checkbox" id="darkTheme" /> Тёмная тема
+  </label>
+
+  <div class="button-row">
+    <button class="start" onclick="saveSettings()"><i class="fa-solid fa-save"></i> Сохранить</button>
+    <button class="reset" onclick="location.href='index.html'"><i class="fa-solid fa-arrow-left"></i> Назад</button>
+  </div>
+
+  <script>
+    function saveSettings() {
+      const settings = {
+        currency: document.getElementById("currency").value,
+        darkTheme: document.getElementById("darkTheme").checked
+      };
+      localStorage.setItem("settings", JSON.stringify(settings));
+      location.href = "index.html";
+    }
+
+    window.onload = function () {
+      const settings = JSON.parse(localStorage.getItem("settings") || "{}");
+      if (settings.currency) document.getElementById("currency").value = settings.currency;
+      if (settings.darkTheme) {
+        document.getElementById("darkTheme").checked = true;
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Таксометр</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <h1>Таксометр</h1>
+
+  <label>Стоимость в час:</label>
+  <input type="text" id="rate" placeholder="Например: 1 000" oninput="formatRateInput(this)" />
+
+  <label>Валюта:</label>
+  <select id="currency">
+    <option value="₽">₽</option>
+    <option value="$">$</option>
+    <option value="€">€</option>
+    <option value="¥">¥</option>
+  </select>
+
+  <h2 id="timer">00:00:00.000</h2>
+  <h2 id="earned">0 ₽</h2>
+
+  <div class="button-row">
+    <button class="start" onclick="startTimer()"><i class="fa-solid fa-play"></i> Старт</button>
+    <button class="stop" onclick="stopTimer()"><i class="fa-solid fa-stop"></i> Стоп</button>
+    <button class="reset" onclick="resetTimer()"><i class="fa-solid fa-rotate"></i> Сброс</button>
+    <button class="history" onclick="location.href='history.html'"><i class="fa-solid fa-clock-rotate-left"></i> История</button>
+  </div>
+
+  <button class="settings" onclick="location.href='settings.html'">
+    <i class="fa-solid fa-gear"></i>
+  </button>
+
+  <script>
+    let startTime, timerInterval;
+    let elapsed = 0;
+
+    function format(ms) {
+      const date = new Date(ms);
+      return date.toISOString().substr(11, 8) + '.' + String(ms % 1000).padStart(3, '0');
+    }
+
+    function update() {
+      const now = Date.now();
+      const timePassed = now - startTime + elapsed;
+      document.getElementById("timer").innerText = format(timePassed);
+      const rateRaw = document.getElementById("rate").value.replace(/\s/g, "");
+      const rate = parseFloat(rateRaw || 0);
+      const perMs = rate / 3600000;
+      const currency = document.getElementById("currency").value;
+      const earned = (timePassed * perMs).toFixed(2);
+      document.getElementById("earned").innerText = earned + " " + currency;
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(update, 50);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      const date = new Date().toLocaleString();
+      const time = document.getElementById("timer").innerText;
+      const earned = document.getElementById("earned").innerText;
+      const rate = document.getElementById("rate").value;
+      const currency = document.getElementById("currency").value;
+      const entry = { date, time, earned, rate, currency, comment: "" };
+      const history = JSON.parse(localStorage.getItem("history") || "[]");
+      history.unshift(entry);
+      localStorage.setItem("history", JSON.stringify(history));
+      elapsed += Date.now() - startTime;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      elapsed = 0;
+      document.getElementById("timer").innerText = "00:00:00.000";
+      document.getElementById("earned").innerText = "0 ₽";
+    }
+
+    function formatRateInput(input) {
+      let value = input.value.replace(/\D/g, ""); // Удаляем всё кроме цифр
+      if (!value) {
+        input.value = "";
+        return;
+      }
+      input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    window.onload = function () {
+      const settings = JSON.parse(localStorage.getItem("settings") || "{}");
+      if (settings.currency) document.getElementById("currency").value = settings.currency;
+      if (settings.darkTheme) document.body.classList.add("dark");
+    };
+  </script>
+</body>
+</html>
